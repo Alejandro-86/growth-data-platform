@@ -1,0 +1,65 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw source tables landing from the seed/ingestion job
+    tables:
+      - name: users
+        description: Raw user signup records
+        columns:
+          - name: user_id
+            tests: [unique, not_null]
+          - name: email
+            tests: [unique, not_null]
+
+      - name: events
+        description: Raw lifecycle events — app opens, purchases, churn
+        columns:
+          - name: event_id
+            tests: [unique, not_null]
+          - name: user_id
+            tests: [not_null]
+          - name: event_type
+            tests:
+              - not_null
+              - accepted_values:
+                  values: ["app_open", "purchase", "churn"]
+
+      - name: campaign_sends
+        description: Raw marketing campaign send/open records
+        columns:
+          - name: send_id
+            tests: [unique, not_null]
+          - name: user_id
+            tests: [not_null]
+          - name: channel
+            tests:
+              - accepted_values:
+                  values: ["email", "push", "sms"]
+
+models:
+  - name: stg_users
+    description: Cleaned user signup records — one row per user
+    columns:
+      - name: user_id
+        tests: [unique, not_null]
+      - name: email
+        tests: [unique, not_null]
+
+  - name: stg_events
+    description: Cleaned lifecycle events — one row per event
+    columns:
+      - name: event_id
+        tests: [unique, not_null]
+      - name: user_id
+        tests: [not_null]
+      - name: event_type
+        tests: [not_null]
+
+  - name: stg_campaign_sends
+    description: Cleaned marketing campaign send/open records
+    columns:
+      - name: send_id
+        tests: [unique, not_null]
+      - name: user_id
+        tests: [not_null]

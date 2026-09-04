@@ -1,0 +1,7 @@
+growth_platform:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: "{{ env_var('GROWTH_PLATFORM_DUCKDB_PATH', '../growth_platform.duckdb') }}"
+      threads: 4

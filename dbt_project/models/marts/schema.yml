@@ -1,0 +1,29 @@
+version: 2
+
+models:
+  - name: engagement_scores
+    description: >
+      One row per user — lifecycle, revenue, and engagement facts plus a
+      composite 0-100 engagement_score. Feeds customer_segments.
+    columns:
+      - name: user_id
+        tests: [unique, not_null]
+      - name: engagement_score
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: "between 0 and 100"
+
+  - name: customer_segments
+    description: >
+      One row per user, classified into a growth/lifecycle segment.
+      Consumed by the reverse-ETL sync job, which pushes segment
+      membership to the MarTech audience API.
+    columns:
+      - name: user_id
+        tests: [unique, not_null]
+      - name: segment
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["high_value", "at_risk_churn", "newly_activated", "standard"]
