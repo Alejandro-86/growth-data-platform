@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -e ".[dev,dbt,airflow]"
+      - name: Lint
+        run: ruff check src/ tests/
+      - name: Type check
+        run: mypy src/
+      - name: Test
+        run: pytest tests/ -v --cov=src --cov-report=xml
+      - name: Seed + dbt build
+        run: |
+          export GROWTH_PLATFORM_DUCKDB_PATH="$GITHUB_WORKSPACE/growth_platform.duckdb"
+          python -c "from growth_platform.seed_data.generator import generate_and_load; generate_and_load('$GROWTH_PLATFORM_DUCKDB_PATH')"
+          cd dbt_project && dbt build --profiles-dir .
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage.xml
