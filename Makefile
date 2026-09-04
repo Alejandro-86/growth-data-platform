@@ -10,7 +10,7 @@ seed:
 	python -c "from growth_platform.seed_data.generator import generate_and_load; print(generate_and_load('$(DUCKDB_PATH)'))"
 
 dbt-build:
-	cd dbt_project && dbt build --profiles-dir .
+	cd dbt_project && dbt deps --profiles-dir . && dbt build --profiles-dir .
 
 api:
 	uvicorn growth_platform.marttech_api.app:app --port 8100
@@ -20,7 +20,7 @@ sync:
 
 test:
 	pytest tests/ -v
-	cd dbt_project && dbt build --profiles-dir .
+	cd dbt_project && dbt deps --profiles-dir . && dbt build --profiles-dir .
 
 lint:
 	ruff check src/ tests/
